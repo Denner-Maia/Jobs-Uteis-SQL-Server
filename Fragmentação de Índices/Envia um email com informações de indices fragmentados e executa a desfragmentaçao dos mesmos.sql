@@ -5,24 +5,24 @@
 --email -> dennermaia22@gmail.com
 
 
---O Script asseguir verifica se h· indices fragmentados no seu BD, caso h·ja È feito o envio de um email para o DBA 
+--O Script asseguir verifica se h√° indices fragmentados no seu BD, caso h√°ja √© feito o envio de um email para o DBA 
 --informando os indices fragmentados e ao mesmo tempo
---executa uma proc para a desfragmentaÁ„o dos indices encontrados.
+--executa uma proc para a desfragmenta√ß√£o dos indices encontrados.
 
 --Meu intuito ao desenvolver esse script e estar sempre deixando o DBA informado dos indices que se fragmentam
---e automatizando a desfragmentaÁao dos indices
+--e automatizando a desfragmenta√ßao dos indices
 
---O email enviado informando indice, tabela, schema e nivel de fragmentaÁao È formatado em HTML e CSS tendo uma
---informaÁao visual bem mais intuitiva.
+--O email enviado informando indice, tabela, schema e nivel de fragmenta√ßao √© formatado em HTML e CSS tendo uma
+--informa√ßao visual bem mais intuitiva.
 
---Utilizei como referencia o post do Dirceu Rezende para a criaÁao do script para envio do email, segue o Link
+--Utilizei como referencia o post do Dirceu Rezende para a cria√ßao do script para envio do email, segue o Link
 --https://www.dirceuresende.com/blog/como-habilitar-enviar-monitorar-emails-pelo-sql-server-sp_send_dbmail/
 ----------------------------------------------------------------------------
 
 
 ----------------------------------------------------------------
---#InstruÁ„o Passo 1
---Primeiro criamos a Procedure para executar a desfragmentaÁao do BD
+--#Instru√ß√£o Passo 1
+--Primeiro criamos a Procedure para executar a desfragmenta√ßao do BD
 --Obs.: informar o nome do BD que deseja criar o proc. 
 
 USE 'Nome do BD'
@@ -67,8 +67,11 @@ drop table #FRAGMENTACAO
 GO
 
 -----------------------------------------------------------
---#InstruÁ„o Passo 2
---Criar a Procedure que envia o email ao DBA e executa a procedure de desfragmentaÁ„o criada no passo 1
+--#Instru√ß√£o Passo 2
+--Criar a Procedure que envia o email ao DBA e executa a procedure de desfragmenta√ß√£o criada no passo 1
+--Inserir o perfil do Databasemail que esta configurado na sua maquina
+--inserir o endereco de email que ir√° receber o email
+	
 --Obs.: informar o nome do BD que deseja criar a proc. 
 
 USE 'Nome do BD'
@@ -133,26 +136,29 @@ WHERE A.DATABASE_ID = DB_ID()
     </tbody>
 </table>
 <br/><br/>
-O processo de desfragmentaÁ„o dos indices j· est· em andamento!,<br/>'
+O processo de desfragmenta√ß√£o dos indices j√° est√° em andamento!,<br/>'
 
 ;
 
 
 -- Envia o e-mail
+--Inserir o perfil do Databasemail que esta configurado na sua maquina
+--inserir o endereco de email que ir√° receber o email
+
 EXEC msdb.dbo.sp_send_dbmail
     @profile_name = 'Perfil do DatabaseMail', -- sysname
-    @recipients = 'email que ir· receber a informaÁ„o', -- varchar(max)
+    @recipients = 'email que ir√° receber a informa√ß√£o', -- varchar(max)
     @subject = N'Indices Fragmentados', -- nvarchar(255)
     @body = @HTML, -- nvarchar(max)
     @body_format = 'html'
 
-	--Executando a Procedure para desfragmentaÁao dos Indices 
+	--Executando a Procedure para desfragmenta√ßao dos Indices 
 	exec sp_desfragmentar_indices;
 GO
 
 -----------------------------------------------------------
---#InstruÁ„o Passo 3 (Opcional)
---Criar o job conforme hor·rio ou dia disponÌvel no seu BD 
+--#Instru√ß√£o Passo 3 (Opcional)
+--Criar o job conforme hor√°rio ou dia dispon√≠vel no seu BD 
 
 
 --Verifica se existe indices fragmentados no seu BD.
@@ -164,6 +170,6 @@ FROM sys.dm_db_index_physical_stats(DB_ID('FabricioLimaConsultoria'),OBJECT_ID('
 	WHERE avg_fragmentation_in_percent > 5
 	AND page_count > 1000
 )
---Caso encontre indices fragmentados envia o email ao DBA e executa a procedure de desfragmentaÁao. 
+--Caso encontre indices fragmentados envia o email ao DBA e executa a procedure de desfragmenta√ßao. 
 	exec sp_enviar_email_de_indices_fragmentados
 go
